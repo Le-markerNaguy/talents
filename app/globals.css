@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --primary: 202 100% 50%; /* #0183ff - Bleu */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 302 100% 45%; /* #e800e4 - Rose */
+    --secondary-foreground: 0 0% 100%;
+
+    --accent: 49 53% 58%; /* #cbbe58 - Or */
+    --accent-foreground: 240 5.9% 10%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 202 100% 50%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 252 96% 48%;
+    --foreground: 0 0% 100%;
+
+    --card: 252 96% 48%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 252 96% 48%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 252 100% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 270 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 252 50% 40%;
+    --muted-foreground: 0 0% 90%;
+
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 252 50% 40%;
+    --input: 252 50% 40%;
+    --ring: 252 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight;
+  }
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-accent;
+}
+
+.gradient-bg {
+  @apply bg-gradient-to-r from-primary via-secondary to-accent;
+}
+
+.form-container {
+  @apply bg-white rounded-xl border border-border shadow-lg;
+}
+
+.form-tab-active {
+  @apply bg-gradient-to-r from-primary to-secondary text-white;
+}
+
+.form-tab-inactive {
+  @apply bg-muted text-muted-foreground hover:text-foreground transition-colors;
+}
+
+.modern-input {
+  @apply border-0 bg-muted rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:outline-none;
+}
+
+.modern-select {
+  @apply border-0 bg-muted rounded-lg focus:ring-2 focus:ring-primary/50 focus:outline-none;
+}
+
+.modern-select-trigger {
+  @apply px-4 py-3;
+}
+
+.modern-textarea {
+  @apply border-0 bg-muted rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary/50 focus:outline-none;
+}
+
+.modern-button {
+  @apply rounded-full font-medium transition-all;
+}
+
+.primary-button {
+  @apply modern-button bg-primary text-white hover:bg-primary/90 px-6 py-3;
+}
+
+.secondary-button {
+  @apply modern-button bg-secondary text-white hover:bg-secondary/90 px-6 py-3;
+}
+
+.accent-button {
+  @apply modern-button bg-accent text-accent-foreground hover:bg-accent/90 px-6 py-3;
+}
+
+.outline-button {
+  @apply modern-button bg-transparent border-2 border-primary text-primary hover:bg-primary/10 px-6 py-[10px];
+}
+
+.bg-mesh {
+  background: linear-gradient(
+    135deg,
+    rgba(1, 131, 255, 0.05) 0%,
+    rgba(232, 0, 228, 0.05) 50%,
+    rgba(203, 190, 88, 0.05) 100%
+  );
+  position: relative;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #0183ff 0%, #e800e4 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 70% 90%, rgba(255, 255, 255, 0.1) 0%, transparent 20%);
+  z-index: 0;
+}
+
+.accent-section {
+  background: linear-gradient(135deg, rgba(203, 190, 88, 0.2) 0%, rgba(203, 190, 88, 0.1) 100%);
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-sm border border-white/20 rounded-xl;
+}
