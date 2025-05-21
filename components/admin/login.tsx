@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,25 +19,30 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    // Si déjà connecté, redirige vers le dashboard
+    if (typeof window !== "undefined" && document.cookie.includes("admin_session=true")) {
+      router.replace("/admin")
+    }
+  }, [router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
     try {
-      // Dans un cas réel, vous feriez une requête à votre API d'authentification
-      // Ici, nous simulons une connexion avec des identifiants codés en dur
-      if (email === "admin@15ktalents.ga" && password === "admin123") {
-        // Simuler un délai de chargement
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Définir un cookie pour simuler une session
-        document.cookie = "admin_session=true; path=/; max-age=3600"
-
-        // Rafraîchir la page pour afficher le tableau de bord
-        router.refresh()
+      const res = await fetch("/api/admin", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setError(data.message || "Identifiants incorrects. Veuillez réessayer.")
       } else {
-        setError("Identifiants incorrects. Veuillez réessayer.")
+        // Redirige vers le dashboard après connexion
+        router.replace("/admin")
       }
     } catch (err) {
       setError("Une erreur est survenue. Veuillez réessayer.")

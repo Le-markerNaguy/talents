@@ -1,41 +1,79 @@
 import { NextResponse } from "next/server"
+import { PrismaClient } from "@/generated/prisma"
 
-// Cette route API gérerait normalement les opérations CRUD pour les talents
-// Dans un cas réel, elle interagirait avec une base de données
+const prisma = new PrismaClient()
 
 export async function GET() {
-  // Simuler la récupération des données depuis une base de données
-  const talents = [
-    {
-      id: "1",
-      name: "Jean Dupont",
-      email: "jean.dupont@example.com",
-      phone: "+241 77 12 34 56",
-      category: "Art et Culture",
-      sector: "Culture",
-      title: "Artiste peintre",
-      status: "approved",
-      createdAt: "2023-05-15T10:30:00Z",
-    },
-    // ... autres talents
-  ]
-
-  return NextResponse.json({ talents })
+  try {
+    const talents = await prisma.talent.findMany({
+      orderBy: { createdAt: "desc" }
+    })
+    return NextResponse.json({ talents })
+  } catch (error) {
+    return NextResponse.json({
+      success: false,
+      message: "Erreur lors de la récupération des talents."
+    }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request) {
   try {
     const data = await request.json()
+    const {
+      fullName,
+      email,
+      phone,
+      city,
+      gender,
+      nationality,
+      categoryId,
+      sectorId,
+      experience,
+      portfolio,
+      acceptedTerms
+    } = data
 
-    // Dans un cas réel, vous inséreriez ces données dans une base de données
-    // const newTalent = await prisma.talent.create({ data })
+    // Validation stricte
+    let accepted = acceptedTerms
+    if (typeof acceptedTerms === "string") {
+      accepted = acceptedTerms === "true" || acceptedTerms === "on"
+    }
 
-    // Simuler une réponse réussie
+    if (
+      !fullName || !email || !phone || !city || !gender || !nationality ||
+      !categoryId || !sectorId || !experience || accepted !== true
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Champs obligatoires manquants ou invalides.",
+        },
+        { status: 400 },
+      )
+    }
+
+    const newTalent = await prisma.talent.create({
+      data: {
+        fullName,
+        email,
+        phone,
+        city,
+        gender,
+        nationality,
+        categoryId,
+        sectorId,
+        experience,
+        portfolio,
+        acceptedTerms: accepted
+      }
+    })
+
     return NextResponse.json(
       {
         success: true,
         message: "Talent enregistré avec succès",
-        talent: { id: "new-id", ...data },
+        talent: newTalent,
       },
       { status: 201 },
     )

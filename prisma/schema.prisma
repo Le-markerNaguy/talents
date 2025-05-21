@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Recommendation {
+  id                 String   @id @default(uuid())
+  recommenderName    String
+  recommenderEmail   String
+  recommenderPhone   String
+  relationship       String
+  talentName         String
+  talentEmail        String?
+  talentPhone        String
+  talentLocation     String
+  categoryId         String
+  sectorId           String
+  talentTitle        String
+  talentDescription  String
+  talentAchievements String?
+  acceptedTerms      Boolean
+  createdAt          DateTime @default(now())
+}
+
+model Talent {
+  id            String   @id @default(uuid())
+  fullName      String
+  email         String
+  phone         String
+  city          String
+  gender        String
+  nationality   String
+  categoryId    String
+  sectorId      String
+  experience    String
+  portfolio     String?
+  acceptedTerms Boolean
+  createdAt     DateTime @default(now())
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}

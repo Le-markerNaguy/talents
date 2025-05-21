@@ -28,12 +28,44 @@ interface RecommendationFormProps {
 
 export default function RecommendationForm({ categories, sectors }: RecommendationFormProps) {
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Ici, vous pourriez ajouter la logique pour envoyer les données à votre API
-    // Par exemple: await fetch('/api/recommendations', { method: 'POST', body: JSON.stringify(formData) })
-    setIsSubmitted(true)
+    setLoading(true)
+    setError(null)
+    const form = e.target as HTMLFormElement
+    const formData = new FormData(form)
+    const payload = {
+      recommenderName: formData.get("yourName"),
+      recommenderEmail: formData.get("yourEmail"),
+      recommenderPhone: formData.get("yourPhone"),
+      relationship: formData.get("relationship"),
+      talentName: formData.get("talentName"),
+      talentEmail: formData.get("talentEmail"),
+      talentPhone: formData.get("talentPhone"),
+      talentLocation: formData.get("talentLocation"),
+      categoryId: formData.get("category"),
+      sectorId: formData.get("sector"),
+      talentTitle: formData.get("talentTitle"),
+      talentDescription: formData.get("talentDescription"),
+      talentAchievements: formData.get("talentAchievements"),
+      acceptedTerms: !!formData.get("terms"),
+    }
+    try {
+      const res = await fetch("/api/recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error("Erreur lors de l'envoi de la recommandation")
+      setIsSubmitted(true)
+    } catch (err: any) {
+      setError(err.message || "Erreur inconnue")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (isSubmitted) {
@@ -86,7 +118,7 @@ export default function RecommendationForm({ categories, sectors }: Recommendati
               <Label htmlFor="relationship">
                 Relation avec le talent <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="relationship" required>
                 <SelectTrigger className="modern-select modern-select-trigger">
                   <SelectValue placeholder="Sélectionnez votre relation" />
                 </SelectTrigger>
@@ -130,7 +162,7 @@ export default function RecommendationForm({ categories, sectors }: Recommendati
               <Label htmlFor="category">
                 Catégorie de talent <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="category" required>
                 <SelectTrigger className="modern-select modern-select-trigger">
                   <SelectValue placeholder="Sélectionnez une catégorie" />
                 </SelectTrigger>
@@ -147,7 +179,7 @@ export default function RecommendationForm({ categories, sectors }: Recommendati
               <Label htmlFor="sector">
                 Secteur d'activité <span className="text-red-500">*</span>
               </Label>
-              <Select required>
+              <Select name="sector" required>
                 <SelectTrigger className="modern-select modern-select-trigger">
                   <SelectValue placeholder="Sélectionnez un secteur" />
                 </SelectTrigger>
@@ -192,7 +224,7 @@ export default function RecommendationForm({ categories, sectors }: Recommendati
             </div>
             <div className="space-y-2 md:col-span-2">
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" required />
+                <Checkbox id="terms" name="terms" required />
                 <Label htmlFor="terms" className="text-sm">
                   Je confirme avoir informé cette personne de ma recommandation et j'accepte que mes informations soient
                   utilisées dans le cadre de l'initiative 15K-Talents <span className="text-red-500">*</span>
@@ -201,10 +233,16 @@ export default function RecommendationForm({ categories, sectors }: Recommendati
             </div>
           </div>
           <div className="flex justify-end mt-8">
-            <Button type="submit" className="primary-button">
-              Envoyer ma recommandation
+            <Button type="submit" className="primary-button" disabled={loading}>
+              {loading ? "Envoi en cours..." : "Envoyer ma recommandation"}
             </Button>
           </div>
+          {error && (
+            <div className="text-red-500 text-sm mb-4">{error}</div>
+          )}
+          {loading && (
+            <div className="text-primary text-sm mb-4">Envoi en cours...</div>
+          )}
         </div>
       </form>
     </div>

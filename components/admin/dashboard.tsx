@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,7 +14,24 @@ import AdminStats from "@/components/admin/stats"
 
 export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("")
+  const [dashboardStats, setDashboardStats] = useState<{ talentsCount: number; recommendationsCount: number; conversionRate: number } | null>(null)
+  const [loadingStats, setLoadingStats] = useState(true)
   const router = useRouter()
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        setDashboardStats(data)
+        setLoadingStats(false)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !document.cookie.includes("admin_session=true")) {
+      router.replace("/admin/login")
+    }
+  }, [router])
 
   const handleLogout = () => {
     // Supprimer le cookie de session
@@ -43,6 +60,33 @@ export default function AdminDashboard() {
           {/* Sidebar */}
           <aside className="w-full md:w-64 space-y-6">
             <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">Statistiques</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {loadingStats ? (
+                  <div className="animate-pulse text-muted-foreground">Chargement...</div>
+                ) : dashboardStats ? (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Talents inscrits :</span>
+                      <span className="font-bold">{dashboardStats.talentsCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Recommandations :</span>
+                      <span className="font-bold">{dashboardStats.recommendationsCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Taux de conversion :</span>
+                      <span className="font-bold">{dashboardStats.conversionRate}%</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">Aucune statistique.</div>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
               <CardContent className="p-4">
                 <nav className="space-y-1">
                   <Button variant="ghost" className="w-full justify-start" asChild>
@@ -70,15 +114,6 @@ export default function AdminDashboard() {
                     </a>
                   </Button>
                 </nav>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Statistiques</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <AdminStats />
               </CardContent>
             </Card>
           </aside>

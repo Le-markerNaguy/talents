@@ -6,7 +6,6 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -28,14 +27,42 @@ interface TalentFormProps {
 }
 
 export default function TalentForm({ categories, sectors }: TalentFormProps) {
-  const [formStep, setFormStep] = useState(1)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Ici, vous pourriez ajouter la logique pour envoyer les données à votre API
-    // Par exemple: await fetch('/api/talents', { method: 'POST', body: JSON.stringify(formData) })
-    setIsSubmitted(true)
+    setLoading(true)
+    setError(null)
+    const form = e.target as HTMLFormElement
+    const formData = new FormData(form)
+    const payload = {
+      fullName: formData.get("fullName"),
+      email: formData.get("email"),
+      phone: formData.get("phone"),
+      city: formData.get("city"),
+      gender: formData.get("gender"),
+      nationality: formData.get("nationality"),
+      categoryId: formData.get("category"),
+      sectorId: formData.get("sector"),
+      experience: formData.get("experience"),
+      portfolio: formData.get("portfolio"),
+      acceptedTerms: !!formData.get("terms"),
+    }
+    try {
+      const res = await fetch("/api/talents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) throw new Error("Erreur lors de l'envoi de la candidature")
+      setIsSubmitted(true)
+    } catch (err: any) {
+      setError(err.message || "Erreur inconnue")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (isSubmitted) {
@@ -57,200 +84,112 @@ export default function TalentForm({ categories, sectors }: TalentFormProps) {
   return (
     <div className="form-container p-8">
       <form onSubmit={handleSubmit} className="space-y-8">
-        {formStep === 1 && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-semibold mb-6">Informations personnelles</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">
-                  Prénom <span className="text-red-500">*</span>
-                </Label>
-                <Input id="firstName" className="modern-input" placeholder="Votre prénom" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">
-                  Nom <span className="text-red-500">*</span>
-                </Label>
-                <Input id="lastName" className="modern-input" placeholder="Votre nom" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">
-                  Email <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  className="modern-input"
-                  placeholder="votre.email@exemple.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">
-                  Téléphone <span className="text-red-500">*</span>
-                </Label>
-                <Input id="phone" className="modern-input" placeholder="+241 XX XX XX XX" required />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">
-                  Adresse <span className="text-red-500">*</span>
-                </Label>
-                <Input id="address" className="modern-input" placeholder="Votre adresse" required />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="city">
-                  Ville <span className="text-red-500">*</span>
-                </Label>
-                <Input id="city" className="modern-input" placeholder="Votre ville" required />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label>
-                  Genre <span className="text-red-500">*</span>
-                </Label>
-                <RadioGroup defaultValue="homme" className="flex space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="homme" id="homme" />
-                    <Label htmlFor="homme">Homme</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="femme" id="femme" />
-                    <Label htmlFor="femme">Femme</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="autre" id="autre" />
-                    <Label htmlFor="autre">Autre</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="birthdate">
-                  Date de naissance <span className="text-red-500">*</span>
-                </Label>
-                <Input id="birthdate" type="date" className="modern-input" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="nationality">
-                  Nationalité <span className="text-red-500">*</span>
-                </Label>
-                <Input id="nationality" className="modern-input" placeholder="Votre nationalité" required />
-              </div>
-            </div>
-            <div className="flex justify-end mt-8">
-              <Button type="button" className="primary-button" onClick={() => setFormStep(2)}>
-                Continuer
-              </Button>
-            </div>
+        <h3 className="text-xl font-semibold mb-6">Inscription talent</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="fullName">
+              Nom complet <span className="text-red-500">*</span>
+            </Label>
+            <Input id="fullName" name="fullName" className="modern-input" placeholder="Votre nom complet" required />
           </div>
-        )}
-
-        {formStep === 2 && (
-          <div className="space-y-6">
-            <h3 className="text-xl font-semibold mb-6">Votre talent</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="category">
-                  Catégorie de talent <span className="text-red-500">*</span>
-                </Label>
-                <Select required>
-                  <SelectTrigger className="modern-select modern-select-trigger">
-                    <SelectValue placeholder="Sélectionnez une catégorie" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sector">
-                  Secteur d'activité <span className="text-red-500">*</span>
-                </Label>
-                <Select required>
-                  <SelectTrigger className="modern-select modern-select-trigger">
-                    <SelectValue placeholder="Sélectionnez un secteur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sectors.map((sector) => (
-                      <SelectItem key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="talentTitle">
-                  Titre de votre talent <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="talentTitle"
-                  className="modern-input"
-                  placeholder="Ex: Artisan innovant, Développeur web, Artiste peintre..."
-                  required
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="experience">
-                  Années d'expérience <span className="text-red-500">*</span>
-                </Label>
-                <Select required>
-                  <SelectTrigger className="modern-select modern-select-trigger">
-                    <SelectValue placeholder="Sélectionnez votre expérience" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0-2">0-2 ans</SelectItem>
-                    <SelectItem value="3-5">3-5 ans</SelectItem>
-                    <SelectItem value="6-10">6-10 ans</SelectItem>
-                    <SelectItem value="10+">Plus de 10 ans</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="description">
-                  Description de votre talent <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  className="modern-textarea min-h-[150px]"
-                  placeholder="Décrivez votre talent, vos réalisations et ce qui vous rend unique..."
-                  required
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="achievements">Principales réalisations</Label>
-                <Textarea
-                  id="achievements"
-                  className="modern-textarea min-h-[100px]"
-                  placeholder="Décrivez vos principales réalisations, prix, reconnaissances..."
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="portfolio">Lien vers votre portfolio/site web/profil LinkedIn</Label>
-                <Input id="portfolio" className="modern-input" placeholder="https://..." />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" required />
-                  <Label htmlFor="terms" className="text-sm">
-                    J'accepte que mes informations soient utilisées dans le cadre de l'initiative 15K-Talents{" "}
-                    <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between mt-8">
-              <Button type="button" variant="outline" onClick={() => setFormStep(1)}>
-                Retour
-              </Button>
-              <Button type="submit" className="primary-button">
-                Soumettre ma candidature
-              </Button>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">
+              Email <span className="text-red-500">*</span>
+            </Label>
+            <Input id="email" name="email" className="modern-input" placeholder="Votre email" required />
           </div>
-        )}
+          <div className="space-y-2">
+            <Label htmlFor="phone">
+              Téléphone <span className="text-red-500">*</span>
+            </Label>
+            <Input id="phone" name="phone" className="modern-input" placeholder="+241 XX XX XX XX" required />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="city">
+              Ville <span className="text-red-500">*</span>
+            </Label>
+            <Input id="city" name="city" className="modern-input" placeholder="Votre ville" required />
+          </div>
+          <div className="space-y-2">
+            <Label>
+              Genre <span className="text-red-500">*</span>
+            </Label>
+            <RadioGroup name="gender" defaultValue="homme" className="flex space-x-4">
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="homme" id="homme" />
+                <Label htmlFor="homme">Homme</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="femme" id="femme" />
+                <Label htmlFor="femme">Femme</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="autre" id="autre" />
+                <Label htmlFor="autre">Autre</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="nationality">
+              Nationalité <span className="text-red-500">*</span>
+            </Label>
+            <Input id="nationality" name="nationality" className="modern-input" placeholder="Votre nationalité" required />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="category">
+              Catégorie <span className="text-red-500">*</span>
+            </Label>
+            <Select name="category" required>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisissez une catégorie" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="sector">
+              Secteur <span className="text-red-500">*</span>
+            </Label>
+            <Select name="sector" required>
+              <SelectTrigger>
+                <SelectValue placeholder="Choisissez un secteur" />
+              </SelectTrigger>
+              <SelectContent>
+                {sectors.map((sec) => (
+                  <SelectItem key={sec.id} value={sec.id}>{sec.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="experience">
+              Expérience <span className="text-red-500">*</span>
+            </Label>
+            <Input id="experience" name="experience" className="modern-input" placeholder="Ex: 1-3 ans" required />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="portfolio">
+              Lien portfolio (facultatif)
+            </Label>
+            <Input id="portfolio" name="portfolio" className="modern-input" placeholder="https://..." />
+          </div>
+          <div className="flex items-center space-x-2 md:col-span-2">
+            <Checkbox id="terms" name="terms" required />
+            <Label htmlFor="terms" className="text-sm">
+              J'accepte que mes informations soient utilisées dans le cadre de l'initiative 15K-Talents <span className="text-red-500">*</span>
+            </Label>
+          </div>
+        </div>
+        <div className="flex justify-end mt-8">
+          <Button type="submit" className="primary-button" disabled={loading}>
+            {loading ? "Envoi en cours..." : "Soumettre ma candidature"}
+          </Button>
+        </div>
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
       </form>
     </div>
   )
